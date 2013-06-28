@@ -50,3 +50,28 @@
   (shell-command
     (format "%s  --langdef=Clojure --langmap=Clojure:.clj.cljs --regex-Clojure='/[ \t\(]*def[a-z]* \([a-z!-]+\)/\1/' --exclude=.js --regex-Clojure='/[ \t\(]*ns \([a-z.]+\)/\1/' -f %s/TAGS -e -R %s" path-to-ctags dir-name (directory-file-name dir-name)))
   )
+
+; clojure in org-babel (from http://nakkaya.com/2013/04/06/using-clojure-with-org-babel-and-nrepl/)
+(require 'ob)
+
+(add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
+
+(defvar org-babel-default-header-args:clojure 
+  '((:results . "silent")))
+
+(defun org-babel-execute:clojure (body params)
+  "Execute a block of Clojure code with Babel."
+  (nrepl-interactive-eval body))
+
+(add-hook 'org-src-mode-hook
+          '(lambda ()
+             (set (make-local-variable 'nrepl-buffer-ns) 
+                  (with-current-buffer 
+                      (overlay-buffer org-edit-src-overlay)
+                    nrepl-buffer-ns))))
+
+(provide 'ob-clojure)
+
+(setq org-src-fontify-natively t)
+(setq org-confirm-babel-evaluate nil)
+(setq org-src-window-setup 'current-window)
