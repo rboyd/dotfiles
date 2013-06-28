@@ -9,20 +9,17 @@
                          "http://marmalade-repo.org/packages/"))
 
 (package-initialize)
-(evil-mode 1)        ;; enable evil-mode
-
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(auto-save-file-name-transforms (quote ((".*" "~/.emacs.d/autosaves/\\1" t))))
+ '(backup-directory-alist (quote ((".*" . "~/.emacs.d/backups/"))))
  '(custom-enabled-themes (quote (forest-monk)))
- '(custom-safe-themes (quote ("26a372a59d30dfedea863c51687c816c84f54a44e9e0e790289e27bb033a9f4f" "71b172ea4aad108801421cc5251edb6c792f3adbaecfa1c52e94e3d99634dee7" "501caa208affa1145ccbb4b74b6cd66c3091e41c5bb66c677feda9def5eab19c" default)))
- '(weblogger-config-alist (quote (("default" ("user" . "user") ("server-url" . "http://bravenewbits.com/xmlrpc/") ("weblog" . "1")))))
- ;; Put autosave files (ie #foo#) and backup files (ie foo~) in ~/.emacs.d/.
- '(auto-save-file-name-transforms '((".*" "~/.emacs.d/autosaves/\\1" t)))
- '(backup-directory-alist '((".*" . "~/.emacs.d/backups/"))))
+ '(custom-safe-themes (quote ("605646c27f4e7592dd7f90594c984316995342062c2fbbd25caf48e80636ef19" "26a372a59d30dfedea863c51687c816c84f54a44e9e0e790289e27bb033a9f4f" "71b172ea4aad108801421cc5251edb6c792f3adbaecfa1c52e94e3d99634dee7" "501caa208affa1145ccbb4b74b6cd66c3091e41c5bb66c677feda9def5eab19c" default)))
+ '(weblogger-config-alist (quote (("default" ("user" . "user") ("server-url" . "http://bravenewbits.com/xmlrpc/") ("weblog" . "1"))))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -40,44 +37,7 @@
     (shell-command-on-region b e
      "python -mjson.tool" (current-buffer) t)))
 
-(require 'evil)
-(require 'evil-leader)
 (require 'org)
-
-(evil-leader/set-leader "\\")
-
-(define-minor-mode evil-org-mode
-  "Buffer local minor mode for evil-org"
-  :init-value nil
-  :lighter " EvilOrg"
-  :keymap (make-sparse-keymap) ; defines evil-org-mode-map
-  :group 'evil-org)
-
-(add-hook 'org-mode-hook 'evil-org-mode) ;; only load with org-mode
-
-;; regular normal state shortcuts.
-(evil-define-key 'normal evil-org-mode-map
-  "gh" 'outline-up-heading
-  "gj" 'org-forward-same-level
-  "gk" 'org-backward-same-level
-  "gl" 'outline-next-visible-heading
-  "H" 'org-beginning-of-line
-  "L" 'org-end-of-line
-  "t" 'org-todo
-  "$" 'org-end-of-line
-  "^" 'org-beginning-of-line
-  "-" 'org-ctrl-c-minus
-  "<" 'org-metaleft
-  ">" 'org-metaright)
-
-;; leader shortcuts in normal state. (disabled for now)
-(evil-leader/set-key
-  "c" 'org-cycle
-  "e" 'org-export-dispatch
-  "n" 'outline-next-visible-heading
-  "p" 'outline-previous-visible-heading
-  "t" 'org-set-tags-command
-  "u" 'outline-up-heading)
 
 (global-linum-mode t)
 (setq linum-format "%d ")
