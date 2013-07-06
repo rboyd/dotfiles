@@ -75,3 +75,6 @@
 (setq org-src-fontify-natively t)
 (setq org-confirm-babel-evaluate nil)
 (setq org-src-window-setup 'current-window)
+
+(defun turn-on-paredit () (paredit-mode 1))
+(add-hook 'clojure-mode-hook 'turn-on-paredit)
