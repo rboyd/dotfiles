@@ -23,7 +23,13 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:height 240 :width normal :family "Inconsolata")))))
+ '(default ((t (:height 240 :width normal :family "Inconsolata"))))
+ '(rainbow-delimiters-depth-1-face ((t (:foreground "color-22"))))
+ '(rainbow-delimiters-depth-2-face ((t (:foreground "color-23"))))
+ '(rainbow-delimiters-depth-3-face ((t (:foreground "color-24"))))
+ '(rainbow-delimiters-depth-4-face ((t (:foreground "color-25"))))
+ '(rainbow-delimiters-depth-5-face ((t (:foreground "color-26"))))
+ '(rainbow-delimiters-depth-6-face ((t (:foreground "color-27")))))
 
 (require 'magit)
 
@@ -78,3 +84,21 @@
 
 (defun turn-on-paredit () (paredit-mode 1))
 (add-hook 'clojure-mode-hook 'turn-on-paredit)
+
+(require 'ac-nrepl)
+(add-hook 'nrepl-mode-hook 'ac-nrepl-setup)
+(add-hook 'nrepl-interaction-mode-hook 'ac-nrepl-setup)
+(eval-after-load "auto-complete"
+  '(add-to-list 'ac-modes 'nrepl-mode))
+(defun set-auto-complete-as-completion-at-point-function ()
+  (setq completion-at-point-functions '(auto-complete)))
+(add-hook 'auto-complete-mode-hook 'set-auto-complete-as-completion-at-point-function)
+(add-hook 'nrepl-mode-hook 'set-auto-complete-as-completion-at-point-function)
+(add-hook 'nrepl-interaction-mode-hook 'set-auto-complete-as-completion-at-point-function)
+(define-key nrepl-interaction-mode-map (kbd "C-c C-d") 'ac-nrepl-popup-doc)
+(add-hook 'clojure-mode-hook 'auto-complete-mode)
+
+(add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
+(setq clojure-mode-use-backtracking-indent t)
+(add-hook 'clojure-mode-hook '(lambda ()
+				(local-set-key (kbd "RET") 'newline-and-indent)))
