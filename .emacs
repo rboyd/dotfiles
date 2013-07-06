@@ -102,3 +102,42 @@
 (setq clojure-mode-use-backtracking-indent t)
 (add-hook 'clojure-mode-hook '(lambda ()
 				(local-set-key (kbd "RET") 'newline-and-indent)))
+
+;;; http://blog.jayfields.com/2013_05_01_archive.html
+(dolist (x '((true        т)
+             (false       ғ)
+             (:keys       ӄ)
+             (nil         Ø)
+             (partial     ∂)
+             (with-redefs я)
+             (comp        º)
+             (interaction ι)
+             (a-fn1       α)
+             (a-fn2       β)
+             (a-fn3       γ)
+             (no-op       ε)
+	     (fn          ƒ)))
+  (eval-after-load 'clojure-mode
+    '(font-lock-add-keywords
+      'clojure-mode `((,(concat "[\[({[:space:]]"
+                                "\\(" (symbol-name (first x)) "\\)"
+                                "[\])}[:space:]]")
+                       (0 (progn (compose-region (match-beginning 1)
+                                                 (match-end 1) ,(symbol-name (second x)))
+                                 nil))))))
+  (eval-after-load 'clojure-mode
+    '(font-lock-add-keywords
+      'clojure-mode `((,(concat "^"
+                                "\\(" (symbol-name (first x)) "\\)"
+                                "[\])}[:space:]]")
+                       (0 (progn (compose-region (match-beginning 1)
+                                                 (match-end 1) ,(symbol-name (second x)))
+                                 nil))))))
+  (eval-after-load 'clojure-mode
+    '(font-lock-add-keywords
+      'clojure-mode `((,(concat "[\[({[:space:]]"
+                                "\\(" (symbol-name (first x)) "\\)"
+                                "$")
+                       (0 (progn (compose-region (match-beginning 1)
+                                                 (match-end 1) ,(symbol-name (second x)))
+                                 nil)))))))
