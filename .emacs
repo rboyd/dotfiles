@@ -141,3 +141,33 @@
                        (0 (progn (compose-region (match-beginning 1)
                                                  (match-end 1) ,(symbol-name (second x)))
                                  nil)))))))
+
+(require 'ob)
+(require 'ob-tangle)
+(add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
+(add-to-list 'org-babel-tangle-lang-exts '("ruby" . "rb"))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (ruby . t)
+   (clojure . t)))
+(require 'ob-clojure)
+(require 'ob-ruby)
+(eval-after-load "ob-clojure"
+  '(defun org-babel-execute:clojure (body params)
+     "Execute a block of Clojure code with Babel and nREPL."
+     (require 'nrepl)
+     (let ((result (nrepl-eval (org-babel-expand-body:clojure body params))))
+       (car (read-from-string (plist-get result :value))))))
+
+(setq org-src-fontify-natively t)
+(setq org-confirm-babel-evaluate nil)
+(setq org-export-babel-evaluate nil)
+(setq org-src-window-setup 'current-window)
+(custom-set-variables '(scheme-program-name "petite"))
+
+(require 'ido)
+(ido-mode t)
+(setq ido-enable-flex-matching t) ; fuzzy matching is a must have
+(global-set-key (kbd "C-x C-M-f") 'find-file-in-project)
