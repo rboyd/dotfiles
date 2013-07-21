@@ -171,3 +171,6 @@
 (ido-mode t)
 (setq ido-enable-flex-matching t) ; fuzzy matching is a must have
 (global-set-key (kbd "C-x C-M-f") 'find-file-in-project)
+(setq ffip-patterns
+  '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.cljs" "*.py" "*.rb" "*.js" "*.pl"
+    "*.sh" "*.erl" "*.hs" "*.ml"))
