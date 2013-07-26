@@ -174,3 +174,42 @@
 (setq ffip-patterns
   '("*.html" "*.org" "*.txt" "*.md" "*.el" "*.clj" "*.cljs" "*.py" "*.rb" "*.js" "*.pl"
     "*.sh" "*.erl" "*.hs" "*.ml"))
+
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+(setq org-default-notes-file (concat org-directory "/notes.org"))
+
+;; Org Capture
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline (concat org-directory "/gtd.org") "Tasks")
+         "* TODO %?\n %i\n")
+	("u" "uri" entry
+	 (file+headline (concat org-directory "/links.org") "Some Default Headline for captures")
+	 "*** %^{Title}\n\n    Source: %u, %c\n    %i")))
+
+
+;; http://www.emacswiki.org/emacs/CopyAndPaste
+(defun copy-from-osx ()
+  (shell-command-to-string "pbpaste"))
+
+(defun paste-to-osx (text &optional push)
+  (let ((process-connection-type nil))
+    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+      (process-send-string proc text)
+      (process-send-eof proc))))
+
+(setq interprogram-cut-function 'paste-to-osx)
+(setq interprogram-paste-function 'copy-from-osx)
+
+(setq inhibit-splash-screen t
+      initial-scratch-message nil)
+
+(setq x-select-enable-clipboard t)
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+(setq tab-width 2
+      indent-tabs-mode nil)
+
+(setq vc-follow-symlinks t)
