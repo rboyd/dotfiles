@@ -169,67 +169,52 @@
 
 (setq vc-follow-symlinks t)
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; org-babel + Clojure
-;; (from https://github.com/stuartsierra/dotfiles)
+;; Add org-babel support
+;; (from https://github.com/lambdatronic/org-babel-example)
 (when (locate-file "ob" load-path load-suffixes)
   (require 'ob)
   (require 'ob-tangle)
-  (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
-
+  (require 'ob-clojure)
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
-     (clojure . t)))
+     (clojure    . t))))
 
-  (defun org-babel-execute:clojure (body params)
-    "Evaluate a block of Clojure code with Babel."
-    (let* ((result (nrepl-send-string-sync body (nrepl-current-ns)))
-           (value (plist-get result :value))
-           (out (plist-get result :stdout))
-           (out (when out
-                  (if (string= "\n" (substring out -1))
-                      (substring out 0 -1)
-                    out)))
-           (stdout (when out
-                     (mapconcat (lambda (line)
-                                  (concat ";; " line))
-                                (split-string out "\n")
-                                "\n"))))
-      (concat stdout
-              (when (and stdout (not (string= "\n" (substring stdout -1))))
-                "\n")
-              ";;=> " value)))
+;; Pull in the htmlize library for pretty source code in HTML output
+(require 'htmlize)
 
-  (provide 'ob-clojure)
+;; Fontify source code in org-latex export to PDF
+(require 'org-latex)
+(setq org-export-latex-listings 'minted)
+(add-to-list 'org-export-latex-packages-alist '("" "minted"))
+(setq org-export-latex-custom-lang-environments
+      '(
+        (emacs-lisp "common-lispcode")
+        ))
+(setq org-export-latex-minted-options
+      '(("fontsize" "\\scriptsize")
+        ("linenos" "false")))
+(setq org-latex-to-pdf-process '("pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f"
+                                 "bibtex %b"
+                                 "pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f"
+                                 "pdflatex -interaction nonstopmode -shell-escape -output-directory %o %f"))
 
-  (setq org-src-fontify-natively t)
-  (setq org-confirm-babel-evaluate nil))
+;; Patch ob-clojure to work with nrepl
+(declare-function nrepl-send-string-sync "ext:nrepl" (code &optional ns))
 
-;; Avoid slow "Fontifying..." on OS X
-(setq font-lock-verbose nil)
-
-(defun org-babel-execute-in-repl ()
-  (interactive)
-  (let ((body (cadr (org-babel-get-src-block-info))))
-    (set-buffer "*nrepl*")
-    (goto-char (point-max))
-    (insert body)
-    (nrepl-return)))
-
-(defun nrepl-eval-expression-at-point-in-repl ()
-  (interactive)
-  (let ((form (nrepl-expression-at-point)))
-    ;; Strip excess whitespace
-    (while (string-match "\\`\s+\\|\n+\\'" form)
-      (setq form (replace-match "" t t form)))
-    (set-buffer "*nrepl*")
-    (goto-char (point-max))
-    (insert form)
-    (nrepl-return)))
-
-(defun nrepl-clear-repl-buffer ()
-  (interactive)
-  (set-buffer "*nrepl*")
-  (nrepl-clear-buffer))
+(defun org-babel-execute:clojure (body params)
+  "Execute a block of Clojure code with Babel."
+  (require 'nrepl)
+  (with-temp-buffer
+    (insert (org-babel-expand-body:clojure body params))
+    ((lambda (result)
+       (let ((result-params (cdr (assoc :result-params params))))
+         (if (or (member "scalar" result-params)
+                 (member "verbatim" result-params))
+             result
+           (condition-case nil (org-babel-script-escape result)
+             (error result)))))
+     (plist-get (nrepl-send-string-sync
+                 (buffer-substring-no-properties (point-min) (point-max))
+                 (cdr (assoc :package params)))
+                :value))))
