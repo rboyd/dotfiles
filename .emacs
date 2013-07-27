@@ -57,30 +57,6 @@
     (format "%s  --langdef=Clojure --langmap=Clojure:.clj.cljs --regex-Clojure='/[ \t\(]*def[a-z]* \([a-z!-]+\)/\1/' --exclude=.js --regex-Clojure='/[ \t\(]*ns \([a-z.]+\)/\1/' -f %s/TAGS -e -R %s" path-to-ctags dir-name (directory-file-name dir-name)))
   )
 
-; clojure in org-babel (from http://nakkaya.com/2013/04/06/using-clojure-with-org-babel-and-nrepl/)
-(require 'ob)
-
-(add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
-
-(defvar org-babel-default-header-args:clojure 
-  '((:results . "silent")))
-
-(defun org-babel-execute:clojure (body params)
-  "Execute a block of Clojure code with Babel."
-  (nrepl-interactive-eval body))
-
-(add-hook 'org-src-mode-hook
-          '(lambda ()
-             (set (make-local-variable 'nrepl-buffer-ns) 
-                  (with-current-buffer 
-                      (overlay-buffer org-edit-src-overlay)
-                    nrepl-buffer-ns))))
-
-(provide 'ob-clojure)
-
-(setq org-src-fontify-natively t)
-(setq org-confirm-babel-evaluate nil)
-(setq org-src-window-setup 'current-window)
 
 (defun turn-on-paredit () (paredit-mode 1))
 (add-hook 'clojure-mode-hook 'turn-on-paredit)
@@ -142,28 +118,7 @@
                                                  (match-end 1) ,(symbol-name (second x)))
                                  nil)))))))
 
-(require 'ob)
-(require 'ob-tangle)
-(add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
-(add-to-list 'org-babel-tangle-lang-exts '("ruby" . "rb"))
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (ruby . t)
-   (clojure . t)))
-(require 'ob-clojure)
-(require 'ob-ruby)
-(eval-after-load "ob-clojure"
-  '(defun org-babel-execute:clojure (body params)
-     "Execute a block of Clojure code with Babel and nREPL."
-     (require 'nrepl)
-     (let ((result (nrepl-eval (org-babel-expand-body:clojure body params))))
-       (car (read-from-string (plist-get result :value))))))
-
 (setq org-src-fontify-natively t)
-(setq org-confirm-babel-evaluate nil)
-(setq org-export-babel-evaluate nil)
 (setq org-src-window-setup 'current-window)
 (custom-set-variables '(scheme-program-name "petite"))
 
@@ -213,3 +168,68 @@
       indent-tabs-mode nil)
 
 (setq vc-follow-symlinks t)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; org-babel + Clojure
+;; (from https://github.com/stuartsierra/dotfiles)
+(when (locate-file "ob" load-path load-suffixes)
+  (require 'ob)
+  (require 'ob-tangle)
+  (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (clojure . t)))
+
+  (defun org-babel-execute:clojure (body params)
+    "Evaluate a block of Clojure code with Babel."
+    (let* ((result (nrepl-send-string-sync body (nrepl-current-ns)))
+           (value (plist-get result :value))
+           (out (plist-get result :stdout))
+           (out (when out
+                  (if (string= "\n" (substring out -1))
+                      (substring out 0 -1)
+                    out)))
+           (stdout (when out
+                     (mapconcat (lambda (line)
+                                  (concat ";; " line))
+                                (split-string out "\n")
+                                "\n"))))
+      (concat stdout
+              (when (and stdout (not (string= "\n" (substring stdout -1))))
+                "\n")
+              ";;=> " value)))
+
+  (provide 'ob-clojure)
+
+  (setq org-src-fontify-natively t)
+  (setq org-confirm-babel-evaluate nil))
+
+;; Avoid slow "Fontifying..." on OS X
+(setq font-lock-verbose nil)
+
+(defun org-babel-execute-in-repl ()
+  (interactive)
+  (let ((body (cadr (org-babel-get-src-block-info))))
+    (set-buffer "*nrepl*")
+    (goto-char (point-max))
+    (insert body)
+    (nrepl-return)))
+
+(defun nrepl-eval-expression-at-point-in-repl ()
+  (interactive)
+  (let ((form (nrepl-expression-at-point)))
+    ;; Strip excess whitespace
+    (while (string-match "\\`\s+\\|\n+\\'" form)
+      (setq form (replace-match "" t t form)))
+    (set-buffer "*nrepl*")
+    (goto-char (point-max))
+    (insert form)
+    (nrepl-return)))
+
+(defun nrepl-clear-repl-buffer ()
+  (interactive)
+  (set-buffer "*nrepl*")
+  (nrepl-clear-buffer))
