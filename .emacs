@@ -186,7 +186,7 @@
       '(("t" "Todo" entry (file+headline (concat org-directory "/gtd.org") "Tasks")
          "* TODO %?\n %i\n")
 	("u" "uri" entry
-	 (file+headline (concat org-directory "/links.org") "Some Default Headline for captures")
+	 (file+headline (concat org-directory "/links.org") "Bookmarks")
 	 "*** %^{Title}\n\n    Source: %u, %c\n    %i")))
 
 
