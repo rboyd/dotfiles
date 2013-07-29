@@ -16,6 +16,8 @@
  '(backup-directory-alist (quote ((".*" . "~/.emacs.d/backups/"))))
  '(custom-enabled-themes (quote (forest-monk)))
  '(custom-safe-themes (quote ("605646c27f4e7592dd7f90594c984316995342062c2fbbd25caf48e80636ef19" "26a372a59d30dfedea863c51687c816c84f54a44e9e0e790289e27bb033a9f4f" "71b172ea4aad108801421cc5251edb6c792f3adbaecfa1c52e94e3d99634dee7" "501caa208affa1145ccbb4b74b6cd66c3091e41c5bb66c677feda9def5eab19c" default)))
+ '(safe-local-variable-values (quote ((encoding . utf-8))))
+ '(scheme-program-name "petite")
  '(weblogger-config-alist (quote (("default" ("user" . "user") ("server-url" . "http://bravenewbits.com/xmlrpc/") ("weblog" . "1"))))))
 
 (custom-set-faces
@@ -120,7 +122,7 @@
 
 (setq org-src-fontify-natively t)
 (setq org-src-window-setup 'current-window)
-(custom-set-variables '(scheme-program-name "petite"))
+
 
 (require 'ido)
 (ido-mode t)
@@ -221,3 +223,11 @@
 
 ;; Make find-file-in-project be a little more liberal.
 (setq ffip-limit 4096)
+
+;; https://github.com/pezra/rspec-mode
+(defadvice rspec-compile (around rspec-compile-around)
+  "Use BASH shell for running the specs because of ZSH issues."
+  (let ((shell-file-name "/bin/bash"))
+    ad-do-it))
+(ad-activate 'rspec-compile)
+(setq rspec-use-rake-when-possible nil)

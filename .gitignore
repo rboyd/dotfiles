@@ -1,1 +1,6 @@
 .emacs.d/ac-comphist.dat
+.emacs.d/eshell
+.emacs.d/auto-save-list/
+.emacs.d/autosaves/
+.emacs.d/backups/
+.emacs.d/bookmarks
