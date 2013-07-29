@@ -218,3 +218,6 @@
                  (buffer-substring-no-properties (point-min) (point-max))
                  (cdr (assoc :package params)))
                 :value))))
+
+;; Make find-file-in-project be a little more liberal.
+(setq ffip-limit 4096)
