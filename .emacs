@@ -180,7 +180,8 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
-     (clojure    . t))))
+     (clojure    . t)
+     (plantuml   . t))))
 
 ;; Pull in the htmlize library for pretty source code in HTML output
 (require 'htmlize)
@@ -231,3 +232,4 @@
     ad-do-it))
 (ad-activate 'rspec-compile)
 (setq rspec-use-rake-when-possible nil)
+(setq org-plantuml-jar-path "~/bin/plantuml.jar")
