@@ -222,6 +222,8 @@
                  (cdr (assoc :package params)))
                 :value))))
 
+(setq org-confirm-babel-evaluate nil)
+
 ;; Make find-file-in-project be a little more liberal.
 (setq ffip-limit 4096)
 
