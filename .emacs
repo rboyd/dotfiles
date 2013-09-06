@@ -181,7 +181,13 @@
    'org-babel-load-languages
    '((emacs-lisp . t)
      (clojure    . t)
-     (plantuml   . t))))
+     (plantuml   . t)
+     (ruby       . t)
+     (ditaa      . t)
+     (dot        . t))))
+
+;; Setup path to ditaa.jar
+(setq org-ditaa-jar-path "/opt/boxen/homebrew/Cellar/ditaa/0.9/libexec/ditaa0_9.jar")
 
 ;; Pull in the htmlize library for pretty source code in HTML output
 (require 'htmlize)
